@@ -4,79 +4,46 @@ package max_partial_sum
   * Created by simipro on 26/02/16.
   */
 object MaxPartialSum extends App {
-  val array2 = Array(5, 7, 12, -48, 9, 36, -17, 40, 22, 11, 55, -49, 49, -49, 111, -117)
-  val array = Array(2, 11, -4, 13)
+  val array = Array(5, 7, 12, -48, 9, 36, -17, 40, 22, 11, 55, -49, 49, -49, 111, -117)
+  val array2 = Array(2, 11, -4, 13) // wrong with prefixes check
 
 
 
-  println("max divide&conquer: " + withDivideAndConquer(array, 0, array.length - 1))
+  println("max divide&conquer: " + withDivideAndConquer(array, 0, array.length))
 
   println("max prefix: " + withPrefixSums().toString)
-  println("max naive: " + withPrefixSums().toString)
+  println("max naive: " + naiveApproach().toString)
 
 
   /**
-    * array size must be power of two
-    * @param left
-    * @param right
+    *
     * @return
     */
-  def withDivideAndConquer(input: Array[Int], left: Int, right: Int): Int = {
-
-    if (left == right) {
-      // so called basecase
-      return input(left)
+  def withDivideAndConquer(input: Array[Int], left: Int, size: Int): Int = {
+    if (size == 1) {
+      return input(left) // recursion basecase
     }
+    val middle: Int = size / 2
+    val maxSumLeft = withDivideAndConquer(input, left, middle)
+    val maxSumRight = withDivideAndConquer(input, left + middle, size - middle)
 
-    val center: Int = (left + right) / 2
+    var leftSum, rightSum = Int.MinValue
+    var sum = 0
 
-    val maxSumLeft = withDivideAndConquer(input, center - 1, center)
-    val maxSumRight = withDivideAndConquer(input, center + 1, right)
-
-    var leftBorderSum = 0
-    var maxLeftBorderSum = 0
-
-    for (i <- center to left by -1) {
-      leftBorderSum = leftBorderSum + input(i)
-      if (leftBorderSum > maxLeftBorderSum) {
-        maxLeftBorderSum = leftBorderSum
-      }
+    for (i <- middle until size) {
+      sum = sum + input(i)
+      rightSum = if (sum > rightSum) sum else rightSum
     }
+    sum = 0
 
-    var rightBorderSum = 0
-    var maxRightBorderSum = 0
-
-
-    for (i <- center to right) {
-      rightBorderSum = rightBorderSum + input(i)
-      if (maxRightBorderSum < rightBorderSum) {
-        maxRightBorderSum = rightBorderSum
-      }
+    for (i <- middle - 1 to 0 by -1) {
+      sum = sum + input(i)
+      leftSum = if (sum > leftSum) sum else leftSum
     }
-
-    val maxMiddleSum = maxRightBorderSum + maxLeftBorderSum
 
     var maxSum = if (maxSumLeft > maxSumRight) maxSumLeft else maxSumRight
-    maxSum = if (maxSum < maxMiddleSum) maxMiddleSum else maxSum
+    maxSum = if (maxSum < rightSum + leftSum) rightSum + leftSum else maxSum
     maxSum
-    /*
-        val size = input.length
-        val middle = size / 2
-
-        size match {
-          case 0 => 0
-          case 1 => input(0)
-          case _ => {
-            var split1 = input.slice(1, middle)
-            var split2 = input.slice(middle + 1, size)
-            //getSolution(split1)
-            //getSolution(split2)
-            0
-          }
-        }
-
-        */
-
   }
 
   /**
